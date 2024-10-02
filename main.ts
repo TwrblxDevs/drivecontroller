@@ -1,16 +1,15 @@
-let soundPlayed = false;
-let StartupPlayed = false;
+let soundPlayed: boolean = false;
+let StartupPlayed: boolean = false;
 
 class SendDirection {
     public MoveDirection: string;
     public isControllerOnline: boolean;
     public ledState: string;
 
-    // Constructor with default values only for boolean and null
-    constructor(moveDirection: string = "None", isOnline: boolean = false, ledState: string = "Off") {
-        this.MoveDirection = moveDirection;
-        this.isControllerOnline = isOnline; // This can be true or false
-        this.ledState = ledState;
+    constructor(moveDirection?: string, isOnline?: boolean, ledState?: string) {
+        this.MoveDirection = moveDirection !== undefined ? moveDirection : "None"; // Default to "None" if undefined
+        this.isControllerOnline = isOnline !== undefined ? isOnline : false; // Default to false if undefined
+        this.ledState = ledState !== undefined ? ledState : "Off"; // Default to "Off" if undefined
     }
 
     public updateDirection(newDirection: string) {
@@ -108,7 +107,7 @@ function move(direction: ArrowNames, action: () => void) {
     action();
 }
 
-function runSafely(fn: any, fnName = "anonymous") {
+function runSafely(fn: () => void, fnName = "anonymous") {
     try {
         console.log(`Running function: ${fnName}`);
         fn();
@@ -129,22 +128,30 @@ runSafely(() => {
     radio.setGroup(2);
 }, "Setting radio group");
 
-// Example usage of SendDirection
-// const controller = new SendDirection();
+const controller = new SendDirection(); // You can also pass arguments like:
+// const controller = new SendDirection("Forward", true, "Green");
 
-// Function to check for tilt and send command
-// function checkTilt() {
-//     const tiltThreshold = 300; // Adjust this value based on your sensitivity preference
+// Tilt detection
+input.onGesture(Gesture.TiltLeft, function () {
+    console.log("Tilted left");
+    controller.updateDirection("Left");
+    controller.sendCommand("Left");
+});
 
-//     // Check if the device is tilted forward
-//     if (input.acceleration(Dimension.Y) < -tiltThreshold) {
-//         controller.updateDirection("Forward");
-//         controller.sendCommand("StartMoveForward");
-//     }
-// }
+input.onGesture(Gesture.TiltRight, function () {
+    console.log("Tilted right");
+    controller.updateDirection("Right");
+    controller.sendCommand("Right");
+});
 
-// Main loop to continuously check for tilt
-// basic.forever(() => {
-//     checkTilt();
-//     basic.pause(200); // Check every 200 ms
-// });
+input.onGesture(Gesture.LogoUp, function () {
+    console.log("Tilted forward");
+    controller.updateDirection("Forward");
+    controller.sendCommand("Forward");
+});
+
+input.onGesture(Gesture.LogoDown, function () {
+    console.log("Tilted backward");
+    controller.updateDirection("Backward");
+    controller.sendCommand("Backward");
+});
